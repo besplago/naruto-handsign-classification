@@ -1,8 +1,8 @@
+"""Create a dataset of pictures for each label in the data folder"""
 import os
 import sys
 import cv2 as cv
 from cv2 import waitKey
-import shutil
 
 DATA_FOLDER: str = r"E:\Repos\naruto-handsign-classification\data"
 TRAIN_DATA_FOLDER: str = os.path.join(DATA_FOLDER, "train_data")

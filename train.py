@@ -1,3 +1,4 @@
+"""Train the model."""
 import sys
 import tensorflow as tf
 from keras.applications.vgg16 import VGG16
@@ -131,9 +132,9 @@ if __name__ ==  '__main__':
             vgg_model = Dropout(0.3)(vgg_model)
             vgg_model = Dense(12, activation='softmax')(vgg_model)
 
-            Altered_VGG = Model(pretrained_model.input, vgg_model, name='Altered_MobileNet')
+            altered_vgg = Model(pretrained_model.input, vgg_model, name='Altered_MobileNet')
 
-            model = Altered_VGG
+            model = altered_vgg
         elif m == 'IC':
             pretrained_model = InceptionV3(include_top=False,
                                 input_shape=(224,224,3),

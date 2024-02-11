@@ -1,3 +1,4 @@
+"""Demo for the model."""
 import os
 import mediapipe as mp
 import cv2
@@ -7,7 +8,6 @@ import tensorflow as tf
 model = tf.keras.models.load_model("./VGG_Naruto_Model")
 
 LENIENCY = 100
-NUM_FRAMES = 0
 
 cap = cv2.VideoCapture(0)
 mpHands = mp.solutions.hands
@@ -24,7 +24,7 @@ while True:
     image = cv2.flip(image,1)
     try:
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    except:
+    except cv2.error:
         continue
     results = hands.process(imageRGB)
 
@@ -34,22 +34,22 @@ while True:
         ys = []
         for handLms in results.multi_hand_landmarks: # working with each hand
 
-            for id, lm in enumerate(handLms.landmark):
+            for _, lm in enumerate(handLms.landmark):
                 h, w, c = image.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
 
                 xs.append(cx)
                 ys.append(cy)
-            
-            #mpDraw.draw_landmarks(image, handLms, mpHands.HAND_CONNECTIONS)
 
-        if len(xs) and len(ys):
+        if len(xs) > 0 and len(ys) > 0:
             ma_x = max([0, max(xs) + LENIENCY])
             ma_y = max([0, max(ys) + LENIENCY])
             mi_x = max([0, min(xs) - LENIENCY])
             mi_y = max([0, min(ys) - LENIENCY])
 
-            image = cv2.rectangle(img=image, pt1=(mi_x, mi_y), pt2=(ma_x, ma_y), color=(0, 0, 255), thickness=2)
+            image = cv2.rectangle(
+                img=image, pt1=(mi_x, mi_y), pt2=(ma_x, ma_y), color=(0, 0, 255), thickness=2
+            )
             cropped = image[mi_y:ma_y, mi_x:ma_x]
             cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
 
@@ -62,56 +62,45 @@ while True:
             cropped = cv2.cvtColor(gray.numpy().astype(np.uint8), cv2.COLOR_GRAY2BGR)
             image[mi_y:ma_y, mi_x:ma_x] = cropped
 
-            # # # # # # # # # # # # # # # 
-            # Predictions Here          #
-            # # # # # # # # # # # # # # #
-
             labels = [
-            'bird',
-            'boar',
-            'dog',
-            'dragon',
-            'hare',
-            'horse',
-            'monkey',
-            'ox',
-            'ram',
-            'rat',
-            'serpent',
-            'tiger'
-            ] 
+                'bird',
+                'boar',
+                'dog',
+                'dragon',
+                'hare',
+                'horse',
+                'monkey',
+                'ox',
+                'ram',
+                'rat',
+                'serpent',
+                'tiger'
+            ]
             x = cropped
             x = cv2.resize(x, (224,224))
             x = tf.image.convert_image_dtype(x, tf.dtypes.uint8)
             x = tf.expand_dims(x, 0)
             pred = model.predict(x)[0]
 
-            confidences = dict()
-            for k in label_images.keys():
-               confidences.update({k: 0})
+            confidences = {}
+
+            for label_image in label_images:
+                confidences.update({label_image: 0})
 
             for i, p in enumerate(pred):
                 confidences[labels[i]] = int(p*100)
 
-            # # # # # # # # # # # # # # # 
-            # Ends Here                 #
-            # # # # # # # # # # # # # # #
-
-            #image = image[mi_y:ma_y, mi_x:ma_x]
-
     else:
-        confidences = dict()
-        for k in label_images.keys():
-            confidences.update({k: 0})
-            NUM_FRAMES += 1
+        confidences = {}
+        for label_image in label_images:
+            confidences.update({label_image: 0})
 
-    colors = dict()
-    for k in confidences.keys():
-        if confidences[k] > 50:
-            colors.update({k: (0, 0, 255)})
+    colors = {}
+    for confidence in confidences.items():
+        if confidence[1] > 50:
+            colors.update({confidence[0]: (0, 0, 255)})
         else:
-            colors.update({k: (0, 0, 0)})
-
+            colors.update({confidence[0]: (0, 0, 0)})
 
     h, w, c = image.shape
 

@@ -1,6 +1,8 @@
+"""Utility functions for image processing."""
 import tensorflow as tf
 
 def otsu_thresholding(image):
+    """Otsu thresholding algorithm."""
     image = tf.convert_to_tensor(image, name="image")
 
     rank = image.shape.rank
@@ -12,7 +14,7 @@ def otsu_thresholding(image):
 
     r, c = image.shape
     hist = tf.math.bincount(image, dtype=tf.int32)
-    
+
     if len(hist)<256:
         hist = tf.concat([hist, [0]*(256-len(hist))], 0)
 
@@ -40,4 +42,4 @@ def otsu_thresholding(image):
             threshold = i
 
     final = tf.where(image>threshold,255,0)
-    return final
+    return final,
