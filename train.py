@@ -75,84 +75,84 @@ if __name__ ==  '__main__':
 
     def load_model(m):
         if m == 'MN':
-        model = tf.keras.applications.mobilenet_v2.MobileNetV2(
-        input_shape=(224,224,3), alpha=1.0, include_top=False, weights='imagenet', pooling=None)
-        
-        for layer in model.layers[:-1]:
-            layer.trainable = False
+            model = tf.keras.applications.mobilenet_v2.MobileNetV2(
+            input_shape=(224,224,3), alpha=1.0, include_top=False, weights='imagenet', pooling=None)
+            
+            for layer in model.layers[:-1]:
+                layer.trainable = False
 
-        mobile_net = Flatten()(model.output)
-        mobile_net = Dropout(0.3)(mobile_net)
-        mobile_net = Dense(4096, activation='relu')(mobile_net)
-        mobile_net = Dropout(0.3)(mobile_net)
-        mobile_net = Dense(1024, activation='relu')(mobile_net)
-        mobile_net = Dropout(0.3)(mobile_net)
-        mobile_net = Dense(12, activation='softmax')(mobile_net)
+            mobile_net = Flatten()(model.output)
+            mobile_net = Dropout(0.3)(mobile_net)
+            mobile_net = Dense(4096, activation='relu')(mobile_net)
+            mobile_net = Dropout(0.3)(mobile_net)
+            mobile_net = Dense(1024, activation='relu')(mobile_net)
+            mobile_net = Dropout(0.3)(mobile_net)
+            mobile_net = Dense(12, activation='softmax')(mobile_net)
 
-        mobile_net_mobile = Model(model.input, mobile_net, name='Altered_MobileNet')
-        mobile_net_mobile.summary()
+            mobile_net_mobile = Model(model.input, mobile_net, name='Altered_MobileNet')
+            mobile_net_mobile.summary()
 
-        model = mobile_net_mobile
+            model = mobile_net_mobile
 
         elif m =='RN':
-        pretrained_model= tf.keras.applications.ResNet50(include_top=False,
-                            input_shape=(224,224,3),
-                            pooling='avg',classes=5,
-                            weights='imagenet')
-        for layer in pretrained_model.layers[:-1]:
-                layer.trainable=False
+            pretrained_model= tf.keras.applications.ResNet50(include_top=False,
+                                input_shape=(224,224,3),
+                                pooling='avg',classes=5,
+                                weights='imagenet')
+            for layer in pretrained_model.layers[:-1]:
+                    layer.trainable=False
 
-        resnet_model = Flatten()(pretrained_model.output)
-        resnet_model = Dropout(0.3)(resnet_model)
-        resnet_model = Dense(4096, activation='relu')(resnet_model)
-        resnet_model = Dropout(0.3)(resnet_model)
-        resnet_model = Dense(1024, activation='relu')(resnet_model)
-        resnet_model = Dropout(0.3)(resnet_model)
-        resnet_model = Dense(12, activation='softmax')(resnet_model)
+            resnet_model = Flatten()(pretrained_model.output)
+            resnet_model = Dropout(0.3)(resnet_model)
+            resnet_model = Dense(4096, activation='relu')(resnet_model)
+            resnet_model = Dropout(0.3)(resnet_model)
+            resnet_model = Dense(1024, activation='relu')(resnet_model)
+            resnet_model = Dropout(0.3)(resnet_model)
+            resnet_model = Dense(12, activation='softmax')(resnet_model)
 
-        Altered_ResNet = Model(pretrained_model.input, resnet_model, name='Altered_MobileNet')
+            Altered_ResNet = Model(pretrained_model.input, resnet_model, name='Altered_MobileNet')
 
-        model = Altered_ResNet
+            model = Altered_ResNet
 
         elif m == 'VG':
-        pretrained_model = VGG16(include_top=False,
-                            input_shape=(224,224,3),
-                            pooling='avg',classes=5,
-                            weights='imagenet')
-        for layer in pretrained_model.layers[:-1]:
-                layer.trainable=False
+            pretrained_model = VGG16(include_top=False,
+                                input_shape=(224,224,3),
+                                pooling='avg',classes=5,
+                                weights='imagenet')
+            for layer in pretrained_model.layers[:-1]:
+                    layer.trainable=False
 
-        vgg_model = Flatten()(pretrained_model.output)
-        vgg_model = Dropout(0.3)(vgg_model)
-        vgg_model = Dense(4096, activation='relu')(vgg_model)
-        vgg_model = Dropout(0.3)(vgg_model)
-        vgg_model = Dense(1024, activation='relu')(vgg_model)
-        vgg_model = Dropout(0.3)(vgg_model)
-        vgg_model = Dense(12, activation='softmax')(vgg_model)
+            vgg_model = Flatten()(pretrained_model.output)
+            vgg_model = Dropout(0.3)(vgg_model)
+            vgg_model = Dense(4096, activation='relu')(vgg_model)
+            vgg_model = Dropout(0.3)(vgg_model)
+            vgg_model = Dense(1024, activation='relu')(vgg_model)
+            vgg_model = Dropout(0.3)(vgg_model)
+            vgg_model = Dense(12, activation='softmax')(vgg_model)
 
-        Altered_VGG = Model(pretrained_model.input, vgg_model, name='Altered_MobileNet')
+            Altered_VGG = Model(pretrained_model.input, vgg_model, name='Altered_MobileNet')
 
-        model = Altered_VGG
+            model = Altered_VGG
 
         elif m == 'IC':
-        pretrained_model = InceptionV3(include_top=False,
-                            input_shape=(224,224,3),
-                            pooling='avg',classes=5,
-                            weights='imagenet')
-        for layer in pretrained_model.layers[:-1]:
-                layer.trainable=False
+            pretrained_model = InceptionV3(include_top=False,
+                                input_shape=(224,224,3),
+                                pooling='avg',classes=5,
+                                weights='imagenet')
+            for layer in pretrained_model.layers[:-1]:
+                    layer.trainable=False
 
-        incep_model = Flatten()(pretrained_model.output)
-        incep_model = Dropout(0.3)(incep_model)
-        incep_model = Dense(4096, activation='relu')(incep_model)
-        incep_model = Dropout(0.3)(incep_model)
-        incep_model = Dense(1024, activation='relu')(incep_model)
-        incep_model = Dropout(0.3)(incep_model)
-        incep_model = Dense(12, activation='softmax')(incep_model)
+            incep_model = Flatten()(pretrained_model.output)
+            incep_model = Dropout(0.3)(incep_model)
+            incep_model = Dense(4096, activation='relu')(incep_model)
+            incep_model = Dropout(0.3)(incep_model)
+            incep_model = Dense(1024, activation='relu')(incep_model)
+            incep_model = Dropout(0.3)(incep_model)
+            incep_model = Dense(12, activation='softmax')(incep_model)
 
-        Altered_Incep = Model(pretrained_model.input, incep_model, name='Altered_MobileNet')
+            Altered_Incep = Model(pretrained_model.input, incep_model, name='Altered_MobileNet')
 
-        model = Altered_Incep
+            model = Altered_Incep
 
         return model
 
@@ -172,7 +172,7 @@ if __name__ ==  '__main__':
         steps_per_epoch=TRAIN_SIZE// BATCH_SIZE,
         validation_steps=TEST_SIZE// BATCH_SIZE,
         shuffle=True,
-        epochs=50,
+        epochs=5,
         callbacks=[early_stopper],
         use_multiprocessing=False,
     )
