@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-model = tf.keras.models.load_model("./VGG_Naruto_Model2")
+model = tf.keras.models.load_model("./VGG_Naruto_Model")
 
 LENIENCY = 100
 NUM_FRAMES = 0
