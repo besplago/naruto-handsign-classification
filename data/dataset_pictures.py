@@ -35,7 +35,7 @@ def create_dataset() -> None:
 
     for label in LABELS:
         if not os.path.exists(label):
-            os.mkdir(f"{label}")
+            os.mkdir(f"{DATA_FOLDER}/{label}")
 
     for folder in LABELS:
         print("Press 'x' for " + folder)
