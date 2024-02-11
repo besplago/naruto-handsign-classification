@@ -30,6 +30,8 @@ if __name__ ==  '__main__':
     if gpus:
         # Set the GPU to be used
         try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
             tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
             logical_gpus = tf.config.experimental.list_logical_devices('GPU')
             print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
@@ -46,7 +48,7 @@ if __name__ ==  '__main__':
         else:
             sys.exit()
 
-    def get_datagen(dataset, aug=False):
+    def _get_datagen(dataset, aug=False):
         if aug:
             datagen = ImageDataGenerator(
                                 rescale=1./255,
@@ -70,14 +72,15 @@ if __name__ ==  '__main__':
                 class_mode='categorical',
                 batch_size=BATCH_SIZE)
 
-    train_generator  = get_datagen(TRAIN_DATA_PATH, True)
-    test_generator   = get_datagen(TEST_DATA_PATH, False)
+    train_generator  = _get_datagen(TRAIN_DATA_PATH, True)
+    test_generator   = _get_datagen(TEST_DATA_PATH, False)
 
-    def load_model(m):
+    def _load_model(m):
+        model = None
         if m == 'MN':
             model = tf.keras.applications.mobilenet_v2.MobileNetV2(
             input_shape=(224,224,3), alpha=1.0, include_top=False, weights='imagenet', pooling=None)
-            
+
             for layer in model.layers[:-1]:
                 layer.trainable = False
 
@@ -93,14 +96,13 @@ if __name__ ==  '__main__':
             mobile_net_mobile.summary()
 
             model = mobile_net_mobile
-
         elif m =='RN':
             pretrained_model= tf.keras.applications.ResNet50(include_top=False,
                                 input_shape=(224,224,3),
                                 pooling='avg',classes=5,
                                 weights='imagenet')
             for layer in pretrained_model.layers[:-1]:
-                    layer.trainable=False
+                layer.trainable=False
 
             resnet_model = Flatten()(pretrained_model.output)
             resnet_model = Dropout(0.3)(resnet_model)
@@ -110,17 +112,16 @@ if __name__ ==  '__main__':
             resnet_model = Dropout(0.3)(resnet_model)
             resnet_model = Dense(12, activation='softmax')(resnet_model)
 
-            Altered_ResNet = Model(pretrained_model.input, resnet_model, name='Altered_MobileNet')
+            altered_res_net = Model(pretrained_model.input, resnet_model, name='Altered_MobileNet')
 
-            model = Altered_ResNet
-
+            model = altered_res_net
         elif m == 'VG':
             pretrained_model = VGG16(include_top=False,
                                 input_shape=(224,224,3),
                                 pooling='avg',classes=5,
                                 weights='imagenet')
             for layer in pretrained_model.layers[:-1]:
-                    layer.trainable=False
+                layer.trainable=False
 
             vgg_model = Flatten()(pretrained_model.output)
             vgg_model = Dropout(0.3)(vgg_model)
@@ -133,14 +134,13 @@ if __name__ ==  '__main__':
             Altered_VGG = Model(pretrained_model.input, vgg_model, name='Altered_MobileNet')
 
             model = Altered_VGG
-
         elif m == 'IC':
             pretrained_model = InceptionV3(include_top=False,
                                 input_shape=(224,224,3),
                                 pooling='avg',classes=5,
                                 weights='imagenet')
             for layer in pretrained_model.layers[:-1]:
-                    layer.trainable=False
+                layer.trainable=False
 
             incep_model = Flatten()(pretrained_model.output)
             incep_model = Dropout(0.3)(incep_model)
@@ -150,23 +150,31 @@ if __name__ ==  '__main__':
             incep_model = Dropout(0.3)(incep_model)
             incep_model = Dense(12, activation='softmax')(incep_model)
 
-            Altered_Incep = Model(pretrained_model.input, incep_model, name='Altered_MobileNet')
+            altered_incep = Model(pretrained_model.input, incep_model, name='Altered_MobileNet')
 
-            model = Altered_Incep
+            model = altered_incep
 
         return model
 
-    model = load_model('VG')
+    selected_model = _load_model('VG')
 
     adam = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
     sgd = tf.keras.optimizers.SGD(learning_rate=0.001)
-    rlrop = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',mode='max',factor=0.5, patience=10, min_lr=0.001, verbose=1)
-    early_stopper = tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1,
-                                                mode='auto', baseline=None, restore_best_weights=True)
-    model.compile(loss='categorical_crossentropy',
-                    optimizer=adam, metrics=['accuracy'])
+    rlrop = tf.keras.callbacks.ReduceLROnPlateau(
+        monitor='val_accuracy',mode='max',factor=0.5, patience=10, min_lr=0.001, verbose=1
+    )
+    early_stopper = tf.keras.callbacks.EarlyStopping(
+        monitor='val_loss',
+        min_delta=0,
+        patience=5,
+        verbose=1,
+        mode='auto',
+        baseline=None,
+        restore_best_weights=True
+    )
+    selected_model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
 
-    history = model.fit(
+    history = selected_model.fit(
         train_generator,
         validation_data=test_generator, 
         steps_per_epoch=TRAIN_SIZE// BATCH_SIZE,
@@ -177,4 +185,4 @@ if __name__ ==  '__main__':
         use_multiprocessing=False,
     )
 
-    model.save("./VGG_Naruto_Model")
+    selected_model.save("./VGG_Naruto_Model")

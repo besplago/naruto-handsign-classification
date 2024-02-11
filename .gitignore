@@ -6,6 +6,7 @@
 tf_test.py
 /train
 /newTest
+/VGG_Naruto_Model
 /VGG_Naruto_Model2
 .vscode/
 .python-version
