@@ -21,7 +21,7 @@ LABELS: list = [
     "snake",
     "tiger"
 ]
-PICTURES_PER_LABEL: int = 50
+PICTURES_PER_LABEL: int = 500
 TEST_SPLIT: int = 20  # Percentage of data to be in the test set
 
 
@@ -58,16 +58,14 @@ def create_dataset() -> None:
         waitKey(2000)
 
         count = 0
-
         while count < PICTURES_PER_LABEL:
             status, frame = camera.read()
-
             if not status:
                 print("Frame is not been captured, terminating...")
                 break
 
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            cv.imshow("Video Window", gray)
+            cv.imshow(f"Do the {folder} sign", gray)
             gray = cv.resize(gray, (600, 400))
             if count < PICTURES_PER_LABEL * (TEST_SPLIT / 100):
                 cv.imwrite(os.path.join(TEST_DATA_FOLDER, folder, f"img{count}.png"), gray)

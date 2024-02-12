@@ -17,6 +17,7 @@ TEST_DATA_PATH: str = PATH_TO_DATA + "test_data"
 BATCH_SIZE = 16
 TRAIN_SIZE = 4777
 TEST_SIZE = 300
+EPOCHS = 50
 
 #Descriptor of file structure of a dataset (example dataset_train)
 #./dataset
@@ -181,7 +182,7 @@ if __name__ ==  '__main__':
         steps_per_epoch=TRAIN_SIZE// BATCH_SIZE,
         validation_steps=TEST_SIZE// BATCH_SIZE,
         shuffle=True,
-        epochs=5,
+        epochs=EPOCHS,
         callbacks=[early_stopper],
         use_multiprocessing=False,
     )
